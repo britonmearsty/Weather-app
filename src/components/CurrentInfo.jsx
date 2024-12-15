@@ -7,6 +7,8 @@ const CurrentInfo = () => {
   const [location, setLocation] = useState("");
   // State for storing city name based on coordinates
   const [cityName, setCityName] = useState("");
+  // State for tracking loading status
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Set up timer to update time every second for live clock display
@@ -32,19 +34,23 @@ const CurrentInfo = () => {
             const data = await response.json();
             // Update city name state with API response
             setCityName(data[0].name);
+            setIsLoading(false);
           } catch (error) {
             console.error("Error fetching city name:", error);
             setCityName(city); // Fallback to imported city if API call fails
+            setIsLoading(false);
           }
         },
         (error) => {
           console.error("Error getting location:", error);
           setCityName(city); // Fallback to imported city if geolocation fails
+          setIsLoading(false);
         },
       );
     }
     else {
       setCityName(city); // Fallback to imported city if geolocation not supported
+      setIsLoading(false);
     }
 
     // Cleanup function to clear interval when component unmounts
@@ -61,7 +67,7 @@ const CurrentInfo = () => {
 
   // Render component UI with time, date and location information
   return (
-    <div className="backdrop-blur-xl rounded-xl shadow-2xl p-8 max-w-md mx-auto mt-12 border-2 border-white/30 transition-all duration-300">
+    <div className="backdrop-blur-xl rounded-xl shadow-2xl p-8 max-w-md mx-auto border-2 border-white/30 transition-all duration-300 mt-28">
       <h2 className="text-4xl font-bold text-gray-900 mb-6 backdrop-blur-sm tracking-tight">
         {getGreeting()}!
       </h2>
@@ -77,7 +83,12 @@ const CurrentInfo = () => {
         })}
       </div>
       <div className="text-gray-800 backdrop-blur-sm text-lg">
-        {cityName ? (
+        {isLoading ? (
+          <div className="flex items-center">
+            <div className="w-6 h-6 mr-3 rounded-full bg-gray-200 animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+          </div>
+        ) : cityName ? (
           <div className="flex items-center hover:text-blue-600 transition-colors duration-200">
             <svg
               className="w-6 h-6 mr-3"
@@ -101,7 +112,7 @@ const CurrentInfo = () => {
             {cityName}
           </div>
         ) : (
-          <div className="flex items-center">Location: loading....</div>
+          <div className="flex items-center">Location unavailable</div>
         )}
       </div>
     </div>
